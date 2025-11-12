@@ -1,9 +1,9 @@
-// app/page.js
 "use client"; // Menandakan ini adalah Client Component
 
 import React, { useState, useEffect } from "react";
 import styles from "./page.module.css"; // Kita akan gunakan CSS Module bawaan
-import VantaBackground from './components/vantaBackground.js'; // Sesuaikan path jika perlu
+import VantaBackground from "./components/vantaBackground.js"; // Sesuaikan path jika perlu
+
 export default function Home() {
   // State untuk menyimpan waktu (dalam detik)
   const [timeInSeconds, setTimeInSeconds] = useState(0);
@@ -12,25 +12,28 @@ export default function Home() {
   const [isRunning, setIsRunning] = useState(false);
 
   // useEffect akan menangani logika interval (detik)
+  // Ini adalah versi yang sudah diperbaiki, aman untuk TypeScript & React
   useEffect(() => {
-    let interval = null;
+    // Variabel untuk menyimpan ID interval
+    let interval: NodeJS.Timeout | null = null;
 
     if (isRunning) {
-      // Jika sedang berjalan, buat interval baru setiap 1 detik
+      // Jika sedang berjalan, buat interval baru
       interval = setInterval(() => {
-        // Menambah waktu 1 detik
+        // Menggunakan fungsi callback di setTimeInSeconds adalah cara teraman
         setTimeInSeconds((prevTime) => prevTime + 1);
-      }, 1000);//1000 Milidetik = 1 detik
-    } else if (!isRunning && timeInSeconds !== 0) {
-      // Jika di-pause (isRunning false) dan waktu tidak 0, hentikan interval
-      clearInterval(interval);
+      }, 1000); // 1000 Milidetik = 1 detik
     }
 
     // Ini adalah 'cleanup function'
-    // Penting untuk membersihkan interval saat komponen di-unmount
-    // atau saat 'isRunning' berubah
-    return () => clearInterval(interval);
-  }, [isRunning, timeInSeconds]); // 'dependency array'
+    // Ini akan berjalan SETIAP KALI 'isRunning' berubah dari true ke false
+    return () => {
+      // Kita cek dulu apakah interval-nya ada sebelum di-clear
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isRunning]); // 'dependency array' HANYA 'isRunning'
 
   // Fungsi untuk tombol Start/Pause
   const handleStartPause = () => {
@@ -39,7 +42,7 @@ export default function Home() {
 
   // Fungsi untuk tombol Reset
   const handleReset = () => {
-    setIsRunning(false); // Matikan timer
+    setIsRunning(false); // Matikan timer (ini akan memicu cleanup di useEffect)
     setTimeInSeconds(0); // Kembalikan waktu ke 0
   };
 
@@ -50,7 +53,7 @@ export default function Home() {
     const seconds = timeInSeconds % 60;
 
     // Menambahkan '0' di depan jika angka < 10
-    const pad = (num) => String(num).padStart(2, "0");
+    const pad = (num: number) => String(num).padStart(2, "0"); // Tambahkan tipe 'number'
 
     return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   };
