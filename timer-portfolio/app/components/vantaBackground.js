@@ -1,19 +1,21 @@
-// app/components/VantaBackground.js
 "use client"; // <-- Tetap pastikan ini ada di baris pertama
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react"; // <-- Kita tidak butuh useState
 import * as THREE from "three";
-// Penting: Impor Vanta effect-nya seperti ini
 import VANTA_CLOUDS2 from "vanta/dist/vanta.clouds2.min.js";
 
 const VantaBackground = () => {
-  const [vantaEffect, setVantaEffect] = useState(null);
+  // Kita gunakan useRef untuk DOM element
   const vantaRef = useRef(null);
 
+  // Kita gunakan useRef untuk menyimpan efek Vanta (BUKAN useState)
+  const vantaEffectRef = useRef(null);
+
   useEffect(() => {
-    // Hanya jalankan jika vantaEffect belum ada DAN vantaRef sudah ter-mount
-    if (!vantaEffect && vantaRef.current) {
-      const effect = VANTA_CLOUDS2({
+    // Hanya jalankan jika efek belum dibuat DAN DOM element sudah ada
+    if (!vantaEffectRef.current && vantaRef.current) {
+      // Buat efeknya dan simpan di ref
+      vantaEffectRef.current = VANTA_CLOUDS2({
         el: vantaRef.current,
         THREE: THREE, // Berikan library THREE
         mouseControls: true,
@@ -26,19 +28,19 @@ const VantaBackground = () => {
         skyColor: 0x5ca6ca,
         cloudColor: 0x334d80,
         speed: 1.4,
-        texturePath: "/noise.png",
-        // ----------------------------------------
+        texturePath: "/noise.png", // Path eksplisit yang sudah kita perbaiki
       });
-      setVantaEffect(effect);
     }
 
     // Cleanup function saat komponen di-unmount
     return () => {
-      if (vantaEffect) {
-        vantaEffect.destroy();
+      if (vantaEffectRef.current) {
+        vantaEffectRef.current.destroy(); // Hancurkan efek
+        vantaEffectRef.current = null; // Bersihkan ref
       }
     };
-  }, [vantaEffect]); // Dependency array
+  }, []); // <-- DEPENDENCY ARRAY KOSONG. Ini SANGAT PENTING.
+  // Ini memastikan useEffect hanya berjalan SEKALI saat mount.
 
   return (
     <div
