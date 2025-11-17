@@ -23,12 +23,10 @@ const VantaBackground = () => {
         minWidth: 200.0,
         scale: 1.0,
         scaleMobile: 1.0,
-
-        // --- KUSTOMISASI ANDA DARI SCREENSHOT ---
-        // (Saya konversi 0x... menjadi 0x... karena JS butuh format itu)
         skyColor: 0x5ca6ca,
         cloudColor: 0x334d80,
         speed: 1.4,
+        texturePath: "/noise.png",
         // ----------------------------------------
       });
       setVantaEffect(effect);
